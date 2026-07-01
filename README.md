@@ -1,12 +1,18 @@
-# recipe_manager
-Менеджер рецептов на PyQt5
+# PyQt5 Practice: Менеджер рецептов
 
-# Менеджер рецептов
+Приложение для хранения и управления рецептами с возможностью добавления фотографий и генерации списка покупок.
 
-Приложение для хранения рецептов с фотографиями и списком покупок.
+## Запуск проекта
+1. Создайте виртуальное окружение: `python -m venv venv`
+2. Активируйте:
+   - Windows: `venv\Scripts\activate`
+   - macOS/Linux: `source venv/bin/activate`
+3. Установите зависимости: `pip install -r requirements.txt`
+4. Запустите: `python main.py`
 
-## Установка и запуск
+## Структура проекта
 
-```bash
-pip install -r requirements.txt
-python main.py
+- `main.py` → Точка входа, настройка `QApplication`
+- `ui_main.py` → Интерфейс, сигналы, обработка событий
+- `database.py` → Работа с SQLite (CRUD)
+- `assets/` → Ресурсы (изображения, иконки)

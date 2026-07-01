@@ -5,7 +5,7 @@ from ui_main import MainWindow
 
 def main():
     app = QApplication(sys.argv)
-    app.setFont(QFont('Verdana', 12)
+    app.setFont(QFont('Verdana', 12))
     app.setApplicationName('Менеджер рецептов')
     window = MainWindow()
     window.show()

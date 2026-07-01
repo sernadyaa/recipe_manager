@@ -18,7 +18,7 @@ class Database:
                 image_path TEXT
             )
         """)
-
+        
         self.connection.commit()
 
 def get_all(self):  # получаем все рецепты из бд

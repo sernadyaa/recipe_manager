@@ -29,5 +29,32 @@ class MainWindow(QMainWindow):
         self._bind_signals()
         # Загружаем рецепты в таблицу
         self._refresh_table()
+    def _setup_ui(self):
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
-        print("Приложение готово к работе!")
+        main_layout = QHBoxLayout()
+        central_widget.setLayout(main_layout)
+
+        # Левая панель: Таблица с рецептами и кнопки
+        left_widget = QWidget()
+        left_layout = QVBoxLayout(left_widget)
+
+        # Таблица
+        self.table = QTableWidget()
+        self.table.setColumnCount(4)
+        self.table.setHorizontalHeaderLabels(["Название", "Категория", "Порции", "Время (мин)"])
+        self.table.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.table.setSelectionBehavior(QTableWidget.SelectRows)
+        self.table.setEditTriggers(QTableWidget.NoEditTriggers)
+        left_layout.addWidget(self.table)
+
+        # Кнопки под таблицей
+        buttons_layout = QHBoxLayout()
+        self.btn_add = QPushButton("Добавить")
+        self.btn_edit = QPushButton("Изменить")
+        self.btn_delete = QPushButton("Удалить")
+        buttons_layout.addWidget(self.btn_add)
+        buttons_layout.addWidget(self.btn_edit)
+        buttons_layout.addWidget(self.btn_delete)
+        left_layout.addLayout(buttons_layout)

@@ -393,17 +393,13 @@ class MainWindow(QMainWindow):
         """)
         self.image_label.setPixmap(QPixmap())  # Убираем картинку
 
-    def closeEvent(self, event):
-        """Когда пользователь закрывает окно"""
-        reply = QMessageBox.question(
-            self,
-            "Выход из приложения",
-            "Вы уверены, что хотите выйти?",
-            QMessageBox.Yes | QMessageBox.No
-        )
+        def closeEvent(self, event):
+        """Переопределение закрытия окна """
+        reply = QMessageBox.question(self, "Выход", "Сохранить изменения перед выходом?",
+                                     QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 
-        if reply == QMessageBox.Yes:
-            self.db.close()  # Закрываем соединение с БД
-            event.accept()
-        else:
+        if reply == QMessageBox.Cancel:
             event.ignore()
+        else:
+            self.db.close()
+            event.accept()

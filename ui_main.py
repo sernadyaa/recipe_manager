@@ -326,6 +326,68 @@ class MainWindow(QMainWindow):
             
             # Сохраняем ID рецепта (для редактирования/удаления)
             self.table.item(i, 0).setData(Qt.UserRole, recipe[0])
-
-
-
+          
+      def _load_image(self):
+        """Загружаем фото"""
+        file_path, _ = QFileDialog.getOpenFileName(self, "Выберите фото для рецепта","",
+            "Изображения (*.png *.jpg *.jpeg *.bmp *.gif)" )
+        
+        if not file_path:
+            return
+        
+        try:
+            self.current_image_path = file_path
+            self._show_image(file_path)
+        except Exception as e:
+            QMessageBox.critical(self, "Ошибка!", f"Не получилось загрузить фото:\n{e}")
+    
+      def _show_image(self, path):
+          """Показываем фото в QLabel (уменьшаем до 300x200)"""
+          image = Image.open(path).convert("RGBA")
+          
+          # Уменьшаем до 300x200 с сохранением пропорций
+          image.thumbnail((300, 200), Image.Resampling.LANCZOS)
+          
+          # Конвертируем для PyQt5
+          data = image.tobytes("raw", "RGBA")
+          qt_image = QImage(data, image.width, image.height, QImage.Format_RGBA8888)
+          pixmap = QPixmap.fromImage(qt_image)
+        
+          self.image_label.setPixmap(pixmap)
+          self.image_label.setAlignment(Qt.AlignCenter)
+          self.image_label.setStyleSheet("""
+              background-color: #f0f0f0;
+              border: 2px solid #4CAF50;
+              border-radius: 8px;
+          """)
+      
+      def _generate_shopping_list(self):
+          """Создаём список покупок из ингредиентов"""
+          ingredients_text = self.ingredients_input.toPlainText().strip()
+          
+          if not ingredients_text:
+              QMessageBox.warning(self, "Внимание", "Нет ингредиентов для списка!")
+              return
+          
+          items = [line.strip() for line in ingredients_text.split('\n') if line.strip()]
+          
+          if not items:
+              QMessageBox.warning(self, "Внимание", "Нет ингредиентов для списка!")
+              return
+          
+          # Формируем список покупок
+          shopping_list = "Список покупок\n"
+          shopping_list += "=" * 30 + "\n\n"
+          
+          for i, item in enumerate(items, 1):
+              shopping_list += f"{i}. {item}\n"
+          
+          # Добавляем название рецепта
+          title = self.title_input.text().strip()
+          if title:
+              shopping_list += f"\nРецепт: {title}"
+          
+          QMessageBox.information(self, "Список покупок", shopping_list)
+  
+  
+  

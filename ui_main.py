@@ -275,6 +275,57 @@ class MainWindow(QMainWindow):
               QMessageBox.information(self, "Успех", "Рецепт удалён!")
           except Exception as e:
               QMessageBox.critical(self, "Внимание", f"Не получилось удалить рецепт:\n{e}")
+          
+      def _on_select_recipe(self):
+        """Когда кликаем на строку в таблице - заполняем форму"""
+        selected_rows = self.table.selectionModel().selectedRows()
+        if not selected_rows:
+            return
+        
+        row = selected_rows[0].row()
+        recipe_id = self.table.item(row, 0).data(Qt.UserRole)
+        
+        # Получаем данные из базы
+        recipe = self.db.get_one(recipe_id)
+        if recipe:
+            # Заполняем поля
+            self.title_input.setText(recipe[1] or "")
+            self.category_input.setText(recipe[2] or "")
+            self.servings_input.setValue(recipe[3] or 1)
+            self.cook_time_input.setValue(recipe[4] or 0)
+            self.ingredients_input.setText(recipe[5] or "")
+            
+            # Загружаем фото, если есть
+            image_path = recipe[6] or ""
+            if image_path and os.path.exists(image_path):
+                self.current_image_path = image_path
+                self._show_image(image_path)
+            else:
+                self.current_image_path = ""
+                self.image_label.setText("Нет фото")
+                self.image_label.setStyleSheet("""
+                    background-color: #f0f0f0;
+                    border: 2px dashed #aaaaaa;
+                    border-radius: 8px;
+                    font-size: 16px;
+                    color: #888888;
+                """)
+    
+    def _refresh_table(self):
+        """Обновляем таблицу - загружаем все рецепты из БД"""
+        self.table.setRowCount(0)  # Очищаем таблицу
+        
+        recipes = self.db.get_all()
+        
+        for i, recipe in enumerate(recipes):
+            self.table.insertRow(i)
+            self.table.setItem(i, 0, QTableWidgetItem(recipe[1] or ""))
+            self.table.setItem(i, 1, QTableWidgetItem(recipe[2] or ""))
+            self.table.setItem(i, 2, QTableWidgetItem(str(recipe[3] or "")))
+            self.table.setItem(i, 3, QTableWidgetItem(str(recipe[4] or "")))
+            
+            # Сохраняем ID рецепта (для редактирования/удаления)
+            self.table.item(i, 0).setData(Qt.UserRole, recipe[0])
 
 
 

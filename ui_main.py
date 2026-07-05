@@ -58,3 +58,47 @@ class MainWindow(QMainWindow):
         buttons_layout.addWidget(self.btn_edit)
         buttons_layout.addWidget(self.btn_delete)
         left_layout.addLayout(buttons_layout)
+
+        # Правая панель: Форма для ввода данных
+        right_widget = QWidget()
+        right_layout = QVBoxLayout(right_widget)
+
+        # Форма с полями ввода
+        form_widget = QWidget()
+        form_layout = QFormLayout(form_widget)
+
+        # Поле: Название
+        self.title_input = QLineEdit()
+        self.title_input.setPlaceholderText("Например: Борщ")
+        form_layout.addRow("Название:", self.title_input)
+
+        # Поле: Категория
+        self.category_input = QLineEdit()
+        self.category_input.setPlaceholderText("Например: Супы")
+        form_layout.addRow("Категория:", self.category_input)
+
+        # Поле: Порции (число от 1 до 99)
+        self.servings_input = QSpinBox()
+        self.servings_input.setMinimum(1)
+        self.servings_input.setMaximum(99)
+        form_layout.addRow("Порции:", self.servings_input)
+
+        # Поле: Время готовки
+        self.cook_time_input = QSpinBox()
+        self.cook_time_input.setMinimum(1)
+        self.cook_time_input.setMaximum(999)
+        self.cook_time_input.setSuffix(" мин")
+        form_layout.addRow("Время готовки:", self.cook_time_input)
+
+        # Поле: Ингредиенты (многострочное)
+        self.ingredients_input = QTextEdit()
+        self.ingredients_input.setPlaceholderText(
+            "Введите ингредиенты по одному на строку:\n"
+            "картошка 500г\n"
+            "свекла 200г\n"
+            "лук 1шт"
+        )
+        self.ingredients_input.setMaximumHeight(120)
+        form_layout.addRow("Ингредиенты:", self.ingredients_input)
+
+        right_layout.addWidget(form_widget)

@@ -102,3 +102,27 @@ class MainWindow(QMainWindow):
         form_layout.addRow("Ингредиенты:", self.ingredients_input)
 
         right_layout.addWidget(form_widget)
+      
+        # Место для изображения
+      
+        self.image_label = QLabel("Нет фото")
+        self.image_label.setAlignment(Qt.AlignCenter)
+        self.image_label.setMinimumHeight(200)
+        self.image_label.setStyleSheet("""
+            background-color: #f0f0f0;
+            border: 2px dashed #aaaaaa;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #888888;
+        """)
+        right_layout.addWidget(self.image_label)
+        
+        # Кнопки для фото и списка покупок
+        image_buttons_layout = QHBoxLayout()
+        self.btn_load_image = QPushButton("Загрузить фото")
+        self.btn_shopping_list = QPushButton("Список покупок")
+        image_buttons_layout.addWidget(self.btn_load_image)
+        image_buttons_layout.addWidget(self.btn_shopping_list)
+        right_layout.addLayout(image_buttons_layout)
+
+

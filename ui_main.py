@@ -124,5 +124,12 @@ class MainWindow(QMainWindow):
         image_buttons_layout.addWidget(self.btn_load_image)
         image_buttons_layout.addWidget(self.btn_shopping_list)
         right_layout.addLayout(image_buttons_layout)
+      
+      # разделитель (позволяет менять размер панелей мышкой)
+        splitter = QSplitter(Qt.Horizontal)
+        splitter.addWidget(left_widget)
+        splitter.addWidget(right_widget)
+        splitter.setSizes([550, 450])
+        main_layout.addWidget(splitter)
 
 

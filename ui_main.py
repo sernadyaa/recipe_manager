@@ -388,6 +388,39 @@ class MainWindow(QMainWindow):
               shopping_list += f"\nРецепт: {title}"
           
           QMessageBox.information(self, "Список покупок", shopping_list)
-  
+            
+      def _clear_fields(self):
+        """Очищаем все поля формы"""
+        self.title_input.clear()
+        self.category_input.clear()
+        self.servings_input.setValue(1)
+        self.cook_time_input.setValue(0)
+        self.ingredients_input.clear()
+        self.current_image_path = ""
+        
+        self.image_label.setText("Нет фото")
+        self.image_label.setStyleSheet("""
+            background-color: #f0f0f0;
+            border: 2px dashed #aaaaaa;
+            border-radius: 8px;
+            font-size: 16px;
+            color: #888888;
+        """)
+        self.image_label.setPixmap(QPixmap())  # Убираем картинку
+    
+    def closeEvent(self, event):
+        """Когда пользователь закрывает окно"""
+        reply = QMessageBox.question(
+            self,
+            "Выход из приложения",
+            "Вы уверены, что хотите выйти?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+        
+        if reply == QMessageBox.Yes:
+            self.db.close()  # Закрываем соединение с БД
+            event.accept()
+        else:
+            event.ignore()
   
   

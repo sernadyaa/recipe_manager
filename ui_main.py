@@ -182,5 +182,99 @@ class MainWindow(QMainWindow):
         """
         self.setStyleSheet(style)
         self.btn_delete.setObjectName("delete_button")
+        
+    def _bind_signals(self):
+      """Привязываем кнопки к функциям"""
+      self.btn_add.clicked.connect(self._add_recipe)
+      self.btn_edit.clicked.connect(self._edit_recipe)
+      self.btn_delete.clicked.connect(self._delete_recipe)
+      self.btn_load_image.clicked.connect(self._load_image)
+      self.btn_shopping_list.clicked.connect(self._generate_shopping_list)
+      self.table.itemSelectionChanged.connect(self._on_select_recipe)
+
+    def _add_recipe(self):
+      """Добавляем новый рецепт"""
+      title = self.title_input.text().strip()
+      if not title:
+          QMessageBox.warning(self, "Внимание", "Введите название рецепта!")
+          self.title_input.setFocus()
+          return
+      
+      # Собираем данные из полей
+      category = self.category_input.text().strip()
+      servings = self.servings_input.value()
+      cook_time = self.cook_time_input.value()
+      ingredients = self.ingredients_input.toPlainText().strip()
+      image_path = self.current_image_path
+      
+      # Добавляем в базу данных
+      try:
+          self.db.add(title, category, servings, cook_time, ingredients, image_path)
+          self._refresh_table()
+          self._clear_fields()
+          QMessageBox.information(self, "Успех", "Рецепт добавлен!")
+      except Exception as e:
+          QMessageBox.critical(self, "Внимание", f"Не получилось добавить рецепт:\n{e}")
+  
+   def _edit_recipe(self):
+      """Редактируем выбранный рецепт"""
+      selected_rows = self.table.selectionModel().selectedRows()
+      if not selected_rows:
+          QMessageBox.warning(self, "Внимание", "Сначала выберите рецепт!")
+          return
+      
+      title = self.title_input.text().strip()
+      if not title:
+          QMessageBox.warning(self, "Внимание", "Введите название рецепта!")
+          return
+      
+      # Получаем ID рецепта
+      row = selected_rows[0].row()
+      recipe_id = self.table.item(row, 0).data(Qt.UserRole)
+      
+      # Собираем данные
+      category = self.category_input.text().strip()
+      servings = self.servings_input.value()
+      cook_time = self.cook_time_input.value()
+      ingredients = self.ingredients_input.toPlainText().strip()
+      image_path = self.current_image_path
+      
+      # Обновляем в базе
+      try:
+          self.db.update(recipe_id, title, category, servings, cook_time, ingredients, image_path)
+          self._refresh_table()
+          self._clear_fields()
+          QMessageBox.information(self, "Успех", "Рецепт обновлён!")
+      except Exception as e:
+          QMessageBox.critical(self, "Внимание", f"Не получилось обновить рецепт:\n{e}")
+  
+  def _delete_recipe(self):
+      """Удаляем выбранный рецепт"""
+      # Проверяем, что выбрана строка
+      selected_rows = self.table.selectionModel().selectedRows()
+      if not selected_rows:
+          QMessageBox.warning(self, "Внимание!", "Сначала выберите рецепт!")
+          return
+      
+      # Спрашиваем подтверждение
+      reply = QMessageBox.question(
+          self, 
+          "Подтверждение удаления", 
+          "Вы уверены, что хотите удалить этот рецепт?",
+          QMessageBox.Yes | QMessageBox.No
+      )
+      
+      if reply == QMessageBox.Yes:
+          row = selected_rows[0].row()
+          recipe_id = self.table.item(row, 0).data(Qt.UserRole)
+          
+          try:
+              self.db.delete(recipe_id)
+              self._refresh_table()
+              self._clear_fields()
+              QMessageBox.information(self, "Успех", "Рецепт удалён!")
+          except Exception as e:
+              QMessageBox.critical(self, "Внимание", f"Не получилось удалить рецепт:\n{e}")
+
 
 

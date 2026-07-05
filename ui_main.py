@@ -16,7 +16,7 @@ class MainWindow(QMainWindow):
         super().__init__()
 
         # Настраиваем окно
-        self.setWindowTitle("Менеджер рецептов")
+        self.setWindowTitle("Менеджер рецептов (PyQt5 Practice)")
         self.resize(1200, 750)
         self.setMinimumSize(1000, 600)
 
@@ -109,13 +109,7 @@ class MainWindow(QMainWindow):
         self.image_label = QLabel("Нет фото")
         self.image_label.setAlignment(Qt.AlignCenter)
         self.image_label.setMinimumHeight(200)
-        self.image_label.setStyleSheet("""
-            background-color: #f0f0f0;
-            border: 2px dashed #aaaaaa;
-            border-radius: 8px;
-            font-size: 16px;
-            color: #888888;
-        """)
+        self.image_label.setStyleSheet("""background-color: #f0f0f0; border: 2px dashed #aaaaaa; border-radius: 8px; font-size: 16px; color: #888888; """)
         right_layout.addWidget(self.image_label)
 
         # Кнопки для фото и списка покупок
@@ -126,7 +120,7 @@ class MainWindow(QMainWindow):
         image_buttons_layout.addWidget(self.btn_shopping_list)
         right_layout.addLayout(image_buttons_layout)
 
-        # разделитель (позволяет менять размер панелей мышкой)
+        # разделитель
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(left_widget)
         splitter.addWidget(right_widget)
@@ -137,50 +131,39 @@ class MainWindow(QMainWindow):
         self._apply_style()
 
     def _apply_style(self):
-        style = """
-            /* Кнопки - зелёные */
+        style ="""
             QPushButton {
-                background-color: #4CAF50;
-                color: white;
+                background-color: #FFFFFF;
+                color: black;
                 border: none;
                 padding: 8px 16px;
                 border-radius: 4px;
-                font-weight: bold;
-            }
-            QPushButton:hover {
-                background-color: #45a049;
             }
             QPushButton:pressed {
-                background-color: #3d8b40;
+                background-color: #E5F4FF;
             }
-
-            /* Кнопка Удалить - красная */
             QPushButton#delete_button {
-                background-color: #f44336;
+                background-color: #006BBE;
             }
             QPushButton#delete_button:hover {
-                background-color: #da190b;
+                background-color: #006BBE;
             }
-
-            /* Таблица */
             QTableWidget {
-                gridline-color: #dddddd;
-                alternate-background-color: #f9f9f9;
+                gridline-color: #F0F0F0;
+                alternate-background-color: #F0F0F0;
             }
             QTableWidget::item:selected {
-                background-color: #4CAF50;
-                color: white;
+                background-color: #E5F4FF;
+                color: black;
             }
-
-            /* Поля ввода */
-            QLineEdit, QTextEdit, QSpinBox {
+            QLineEdit, QTextEdit, QSpinBox{
                 padding: 6px;
-                border: 1px solid #cccccc;
-                border-radius: 4px;
+                border: 1px solid #8F949C;
+                border-radius: 3px;
             }
-            QLineEdit:focus, QTextEdit:focus, QSpinBox:focus {
-                border: 2px solid #4CAF50;
-            }
+            
+            QLineEdit:focus, QTextEdit:focus, QSpinBox:focus
+            {border: 2px solid #006BBE;}
         """
         self.setStyleSheet(style)
         self.btn_delete.setObjectName("delete_button")

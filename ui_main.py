@@ -75,9 +75,8 @@ class MainWindow(QMainWindow):
         form_layout.addRow("Название:", self.title_input)
 
         # Поле: Категория
-        self.category_input = QLineEdit()
-        self.category_input.setPlaceholderText("Например: Супы")
-        form_layout.addRow("Категория:", self.category_input)
+        self.cb_category = QComboBox()
+        self.cb_category.addItems(["Завтрак", "Суп", "Основное блюдо", "Салат", "Десерт"])
 
         # Поле: Порции (число от 1 до 99)
         self.servings_input = QSpinBox()

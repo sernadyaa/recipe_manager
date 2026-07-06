@@ -2,7 +2,7 @@ import os
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                              QPushButton, QLineEdit, QTextEdit, QLabel, QTableWidget,
                              QTableWidgetItem, QHeaderView, QMessageBox, QFileDialog,
-                             QSplitter, QSpinBox)
+                             QSplitter, QSpinBox, QComboBox)
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QImage
 from PIL import Image

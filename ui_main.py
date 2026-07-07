@@ -13,6 +13,7 @@ class MainWindow(QMainWindow):
     """Главное окно приложения Менеджер рецептов"""
 
     def __init__(self):
+      """Конструктор - вызывается при создании окна"""
         super().__init__()
         self.setWindowTitle("Менеджер рецептов (PyQt5 Practice)")
         self.resize(1200, 750)
@@ -28,6 +29,7 @@ class MainWindow(QMainWindow):
         self._refresh_table()
 
     def _setup_ui(self):
+      """Создаём весь интерфейс окна"""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
@@ -119,6 +121,7 @@ class MainWindow(QMainWindow):
         self._apply_style()
 
     def _apply_style(self):
+      """Применяем стили"""
         style = """
             QPushButton {
                 background-color: #FFFFFF;
@@ -157,7 +160,7 @@ class MainWindow(QMainWindow):
         self.btn_delete.setObjectName("delete_button")
 
     def _bind_signals(self):
-        """Привязываем кнопки к функциям"""
+      """Привязываем кнопки к функциям"""
         self.btn_add.clicked.connect(self._add_recipe)
         self.btn_edit.clicked.connect(self._edit_recipe)
         self.btn_delete.clicked.connect(self._delete_recipe)
@@ -166,23 +169,21 @@ class MainWindow(QMainWindow):
         self.table.itemSelectionChanged.connect(self._on_select_recipe)
 
     def _add_recipe(self):
-        """Добавляем новый рецепт"""
+      """Привязываем кнопки к функциям"""
         title = self.le_title.text().strip()
         if not title:
-            QMessageBox.warning(self, "Внимание", "Введите название рецепта!")
+            QMessageBox.warning(self, "Ошибка!", "Введите название рецепта!")
             self.le_title.setFocus()
             return
-
-        # Собираем данные из полей
-        category = self.cb_category.currentText().strip()  # Используем currentText()
-        servings = self.spin_servings.value()
-        cook_time = self.spin_cook_time.value()
-        ingredients = self.te_ingredients.toPlainText().strip()
-        image_path = self.current_image_path
-
-        # Добавляем в базу данных
         try:
-            self.db.add(title, category, servings, cook_time, ingredients, image_path)
+            self.db.add(
+                title,
+                self.cb_category.currentText(),
+                self.spin_servings.value(),
+                self.spin_cook_time.value(),
+                self.te_ingredients.toPlainText().strip(),
+                self.current_image_path
+            )
             self._refresh_table()
             self._clear_fields()
             QMessageBox.information(self, "Успех", "Рецепт добавлен!")
@@ -201,20 +202,17 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Внимание", "Введите название рецепта!")
             return
 
-        # Получаем ID рецепта
         row = selected_rows[0].row()
         recipe_id = self.table.item(row, 0).data(Qt.UserRole)
 
-        # Собираем данные
-        category = self.cb_category.currentText().strip()  # Используем currentText()
-        servings = self.spin_servings.value()
-        cook_time = self.spin_cook_time.value()
-        ingredients = self.te_ingredients.toPlainText().strip()
-        image_path = self.current_image_path
-
-        # Обновляем в базе
         try:
-            self.db.update(recipe_id, title, category, servings, cook_time, ingredients, image_path)
+            self.db.update(recipe_id, title,
+                 self.cb_category.currentText(),
+                 self.spin_servings.value(),
+                 self.spin_cook_time.value(),
+                 self.te_ingredients.toPlainText().strip(),
+                 self.current_image_path
+             )
             self._refresh_table()
             self._clear_fields()
             QMessageBox.information(self, "Успех", "Рецепт обновлён!")
@@ -222,20 +220,15 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Внимание", f"Не получилось обновить рецепт:\n{e}")
 
     def _delete_recipe(self):
-        """Удаляем выбранный рецепт"""
-        # Проверяем, что выбрана строка
+      """Удаляем выбранный рецепт"""
         selected_rows = self.table.selectionModel().selectedRows()
         if not selected_rows:
             QMessageBox.warning(self, "Внимание!", "Сначала выберите рецепт!")
             return
-
-        # Спрашиваем подтверждение
-        reply = QMessageBox.question(
-            self,
-            "Подтверждение удаления",
-            "Вы уверены, что хотите удалить этот рецепт?",
-            QMessageBox.Yes | QMessageBox.No
-        )
+          
+        reply = QMessageBox.question(self,
+            "Подтверждение", "Вы уверены, что хотите удалить этот рецепт?",
+            QMessageBox.Yes | QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             row = selected_rows[0].row()
@@ -250,7 +243,7 @@ class MainWindow(QMainWindow):
                 QMessageBox.critical(self, "Внимание", f"Не получилось удалить рецепт:\n{e}")
 
     def _on_select_recipe(self):
-        """Когда кликаем на строку в таблице - заполняем форму"""
+        """Заполнение формы при клике на строку таблицы"""
         selected_rows = self.table.selectionModel().selectedRows()
         if not selected_rows:
             return
@@ -258,21 +251,19 @@ class MainWindow(QMainWindow):
         row = selected_rows[0].row()
         recipe_id = self.table.item(row, 0).data(Qt.UserRole)
 
-        # Получаем данные из базы
         recipe = self.db.get_one(recipe_id)
         if recipe:
-            # Заполняем поля
             self.le_title.setText(recipe[1] or "")
-            # Устанавливаем категорию по тексту
             category = recipe[2] or ""
             index = self.cb_category.findText(category)
             if index >= 0:
                 self.cb_category.setCurrentIndex(index)
+            else:
+                self.cb_category.setCurrentIndex(0)
             self.spin_servings.setValue(recipe[3] or 1)
-            self.spin_cook_time.setValue(recipe[4] or 1)
+            self.spin_cook_time.setValue(recipe[4] or 0)
             self.te_ingredients.setText(recipe[5] or "")
 
-            # Загружаем фото, если есть
             image_path = recipe[6] or ""
             if image_path and os.path.exists(image_path):
                 self.current_image_path = image_path
@@ -280,18 +271,11 @@ class MainWindow(QMainWindow):
             else:
                 self.current_image_path = ""
                 self.lbl_image.setText("Нет фото")
-                self.lbl_image.setStyleSheet("""
-                    background-color: #f0f0f0;
-                    border: 2px dashed #aaaaaa;
-                    border-radius: 8px;
-                    font-size: 16px;
-                    color: #888888;
-                """)
+                self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #999; border-radius: 8px;")
 
     def _refresh_table(self):
-        """Обновляем таблицу - загружаем все рецепты из БД"""
-        self.table.setRowCount(0)  # Очищаем таблицу
-
+        """Обновление данных таблицы из БД"""
+        self.table.setRowCount(0)
         recipes = self.db.get_all()
 
         for i, recipe in enumerate(recipes):
@@ -301,65 +285,50 @@ class MainWindow(QMainWindow):
             self.table.setItem(i, 2, QTableWidgetItem(str(recipe[3] or "")))
             self.table.setItem(i, 3, QTableWidgetItem(str(recipe[4] or "")))
 
-            # Сохраняем ID рецепта (для редактирования/удаления)
             self.table.item(i, 0).setData(Qt.UserRole, recipe[0])
 
     def _load_image(self):
-        """Загружаем фото"""
+        """Загрузка и масштабирование изображения через Pillow"""
         file_path, _ = QFileDialog.getOpenFileName(self, "Выберите фото для рецепта", "",
                                                    "Изображения (*.png *.jpg *.jpeg *.bmp *.gif)")
 
-        if not file_path:
-            return
-
-        try:
-            self.current_image_path = file_path
-            self._show_image(file_path)
-        except Exception as e:
-            QMessageBox.critical(self, "Ошибка!", f"Не получилось загрузить фото:\n{e}")
+        if file_path:
+            try:
+                self.current_image_path = file_path
+                self._show_image(file_path)
+            except Exception as e:
+                QMessageBox.critical(self, "Внимание", f"Не удалось загрузить фото:\n{e}")
 
     def _show_image(self, path):
         """Показываем фото в QLabel (уменьшаем до 300x200)"""
         image = Image.open(path).convert("RGBA")
-
-        # Уменьшаем до 300x200 с сохранением пропорций
         image.thumbnail((300, 200), Image.Resampling.LANCZOS)
 
-        # Конвертируем для PyQt5
         data = image.tobytes("raw", "RGBA")
         qt_image = QImage(data, image.width, image.height, QImage.Format_RGBA8888)
         pixmap = QPixmap.fromImage(qt_image)
 
         self.lbl_image.setPixmap(pixmap)
         self.lbl_image.setAlignment(Qt.AlignCenter)
-        self.lbl_image.setStyleSheet("""
-            background-color: #f0f0f0;
-            border: 2px solid #4CAF50;
-            border-radius: 8px;
-        """)
+        self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #006BBE; border-radius: 6px; ")
 
     def _generate_shopping_list(self):
         """Создаём список покупок из ингредиентов"""
         ingredients_text = self.te_ingredients.toPlainText().strip()
-
         if not ingredients_text:
             QMessageBox.warning(self, "Внимание", "Нет ингредиентов для списка!")
             return
 
         items = [line.strip() for line in ingredients_text.split('\n') if line.strip()]
-
         if not items:
             QMessageBox.warning(self, "Внимание", "Нет ингредиентов для списка!")
             return
-
-        # Формируем список покупок
-        shopping_list = "Список покупок\n"
-        shopping_list += "=" * 30 + "\n\n"
+          
+        shopping_list = "Список покупок\n" + "=" * 30 + "\n\n"
 
         for i, item in enumerate(items, 1):
             shopping_list += f"{i}. {item}\n"
 
-        # Добавляем название рецепта
         title = self.le_title.text().strip()
         if title:
             shopping_list += f"\nРецепт: {title}"
@@ -369,23 +338,17 @@ class MainWindow(QMainWindow):
     def _clear_fields(self):
         """Очищаем все поля формы"""
         self.le_title.clear()
-        self.cb_category.setCurrentIndex(0)  # Исправлено: устанавливаем на первый элемент
+        self.cb_category.setCurrentIndex(0)
         self.spin_servings.setValue(1)
-        self.spin_cook_time.setValue(1)  # Исправлено: устанавливаем 1 вместо 0
+        self.spin_cook_time.setValue(1)
         self.te_ingredients.clear()
         self.current_image_path = ""
 
-        self.lbl_image.setText("Нет фото")
-        self.lbl_image.setStyleSheet("""
-            background-color: #f0f0f0;
-            border: 2px dashed #aaaaaa;
-            border-radius: 8px;
-            font-size: 16px;
-            color: #888888;
-        """)
-        self.lbl_image.setPixmap(QPixmap())  # Убираем картинку
+        self.lbl_image.setText("Фото")
+        self.lbl_image.setStyleSheet(("background-color: #f5f5f5; border: 2px dashed #bbb; border-radius: 8px;"))
+        self.lbl_image.setPixmap(QPixmap())
 
-    def closeEvent(self, event):  # Исправлено: метод на уровне класса
+    def closeEvent(self, event):
         """Переопределение закрытия окна"""
         reply = QMessageBox.question(self, "Выход", "Сохранить изменения перед выходом?",
                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)

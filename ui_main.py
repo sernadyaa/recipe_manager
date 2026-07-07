@@ -77,6 +77,7 @@ class MainWindow(QMainWindow):
         # Поле: Категория
         self.cb_category = QComboBox()
         self.cb_category.addItems(["Завтрак", "Суп", "Основное блюдо", "Салат", "Десерт"])
+        form_layout.addRow("Категория:", self.cb_category)  # Эта строка была пропущена!
 
         # Поле: Порции (число от 1 до 99)
         self.spin_servings = QSpinBox()
@@ -130,7 +131,7 @@ class MainWindow(QMainWindow):
         self._apply_style()
 
     def _apply_style(self):
-        style ="""
+        style = """
             QPushButton {
                 background-color: #FFFFFF;
                 color: black;
@@ -185,7 +186,7 @@ class MainWindow(QMainWindow):
             return
 
         # Собираем данные из полей
-        category = self.cb_category.text().strip()
+        category = self.cb_category.currentText().strip()  # Используем currentText()
         servings = self.spin_servings.value()
         cook_time = self.spin_cook_time.value()
         ingredients = self.te_ingredients.toPlainText().strip()
@@ -217,7 +218,7 @@ class MainWindow(QMainWindow):
         recipe_id = self.table.item(row, 0).data(Qt.UserRole)
 
         # Собираем данные
-        category = self.cb_category.text().strip()
+        category = self.cb_category.currentText().strip()  # Используем currentText()
         servings = self.spin_servings.value()
         cook_time = self.spin_cook_time.value()
         ingredients = self.te_ingredients.toPlainText().strip()
@@ -274,9 +275,13 @@ class MainWindow(QMainWindow):
         if recipe:
             # Заполняем поля
             self.le_title.setText(recipe[1] or "")
-            self.cb_category.setText(recipe[2] or "")
+            # Устанавливаем категорию по тексту
+            category = recipe[2] or ""
+            index = self.cb_category.findText(category)
+            if index >= 0:
+                self.cb_category.setCurrentIndex(index)
             self.spin_servings.setValue(recipe[3] or 1)
-            self.spin_cook_time.setValue(recipe[4] or 0)
+            self.spin_cook_time.setValue(recipe[4] or 1)
             self.te_ingredients.setText(recipe[5] or "")
 
             # Загружаем фото, если есть
@@ -376,9 +381,9 @@ class MainWindow(QMainWindow):
     def _clear_fields(self):
         """Очищаем все поля формы"""
         self.le_title.clear()
-        self.cb_category.clear()
+        self.cb_category.setCurrentIndex(0)  # Исправлено: устанавливаем на первый элемент
         self.spin_servings.setValue(1)
-        self.spin_cook_time.setValue(0)
+        self.spin_cook_time.setValue(1)  # Исправлено: устанавливаем 1 вместо 0
         self.te_ingredients.clear()
         self.current_image_path = ""
 
@@ -392,8 +397,8 @@ class MainWindow(QMainWindow):
         """)
         self.lbl_image.setPixmap(QPixmap())  # Убираем картинку
 
-        def closeEvent(self, event):
-        """Переопределение закрытия окна """
+    def closeEvent(self, event):  # Исправлено: метод на уровне класса
+        """Переопределение закрытия окна"""
         reply = QMessageBox.question(self, "Выход", "Сохранить изменения перед выходом?",
                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 

@@ -13,7 +13,7 @@ class MainWindow(QMainWindow):
     """Главное окно приложения Менеджер рецептов"""
 
     def __init__(self):
-      """Конструктор - вызывается при создании окна"""
+        """Конструктор - вызывается при создании окна"""
         super().__init__()
         self.setWindowTitle("Менеджер рецептов (PyQt5 Practice)")
         self.resize(1200, 750)
@@ -29,7 +29,7 @@ class MainWindow(QMainWindow):
         self._refresh_table()
 
     def _setup_ui(self):
-      """Создаём весь интерфейс окна"""
+        """Создаём весь интерфейс окна"""
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
@@ -70,7 +70,7 @@ class MainWindow(QMainWindow):
 
         self.cb_category = QComboBox()
         self.cb_category.addItems(["Завтрак", "Суп", "Основное блюдо", "Салат", "Десерт"])
-        form_layout.addRow("Категория:", self.cb_category)  # Эта строка была пропущена!
+        form_layout.addRow("Категория:", self.cb_category)
 
         self.spin_servings = QSpinBox()
         self.spin_servings.setMinimum(1)
@@ -121,7 +121,7 @@ class MainWindow(QMainWindow):
         self._apply_style()
 
     def _apply_style(self):
-      """Применяем стили"""
+        """Применяем стили"""
         style = """
             QPushButton {
                 background-color: #FFFFFF;
@@ -160,7 +160,7 @@ class MainWindow(QMainWindow):
         self.btn_delete.setObjectName("delete_button")
 
     def _bind_signals(self):
-      """Привязываем кнопки к функциям"""
+        """Привязываем кнопки к функциям"""
         self.btn_add.clicked.connect(self._add_recipe)
         self.btn_edit.clicked.connect(self._edit_recipe)
         self.btn_delete.clicked.connect(self._delete_recipe)
@@ -169,7 +169,7 @@ class MainWindow(QMainWindow):
         self.table.itemSelectionChanged.connect(self._on_select_recipe)
 
     def _add_recipe(self):
-      """Привязываем кнопки к функциям"""
+        """Добавляем новый рецепт"""
         title = self.le_title.text().strip()
         if not title:
             QMessageBox.warning(self, "Ошибка!", "Введите название рецепта!")
@@ -206,13 +206,15 @@ class MainWindow(QMainWindow):
         recipe_id = self.table.item(row, 0).data(Qt.UserRole)
 
         try:
-            self.db.update(recipe_id, title,
-                 self.cb_category.currentText(),
-                 self.spin_servings.value(),
-                 self.spin_cook_time.value(),
-                 self.te_ingredients.toPlainText().strip(),
-                 self.current_image_path
-             )
+            self.db.update(
+                recipe_id,
+                title,
+                self.cb_category.currentText(),
+                self.spin_servings.value(),
+                self.spin_cook_time.value(),
+                self.te_ingredients.toPlainText().strip(),
+                self.current_image_path
+            )
             self._refresh_table()
             self._clear_fields()
             QMessageBox.information(self, "Успех", "Рецепт обновлён!")
@@ -220,15 +222,15 @@ class MainWindow(QMainWindow):
             QMessageBox.critical(self, "Внимание", f"Не получилось обновить рецепт:\n{e}")
 
     def _delete_recipe(self):
-      """Удаляем выбранный рецепт"""
+        """Удаляем выбранный рецепт"""
         selected_rows = self.table.selectionModel().selectedRows()
         if not selected_rows:
             QMessageBox.warning(self, "Внимание!", "Сначала выберите рецепт!")
             return
           
         reply = QMessageBox.question(self,
-            "Подтверждение", "Вы уверены, что хотите удалить этот рецепт?",
-            QMessageBox.Yes | QMessageBox.No)
+                                 "Подтверждение", "Вы уверены, что хотите удалить этот рецепт?",
+                                 QMessageBox.Yes | QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             row = selected_rows[0].row()

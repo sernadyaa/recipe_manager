@@ -70,46 +70,46 @@ class MainWindow(QMainWindow):
         form_layout = QFormLayout(form_widget)
 
         # Поле: Название
-        self.title_input = QLineEdit()
-        self.title_input.setPlaceholderText("Например: Борщ")
-        form_layout.addRow("Название:", self.title_input)
+        self.le_title = QLineEdit()
+        self.le_title.setPlaceholderText("Например: Борщ")
+        form_layout.addRow("Название:", self.le_title)
 
         # Поле: Категория
         self.cb_category = QComboBox()
         self.cb_category.addItems(["Завтрак", "Суп", "Основное блюдо", "Салат", "Десерт"])
 
         # Поле: Порции (число от 1 до 99)
-        self.servings_input = QSpinBox()
-        self.servings_input.setMinimum(1)
-        self.servings_input.setMaximum(99)
-        form_layout.addRow("Порции:", self.servings_input)
+        self.spin_servings = QSpinBox()
+        self.spin_servings.setMinimum(1)
+        self.spin_servings.setMaximum(99)
+        form_layout.addRow("Порции:", self.spin_servings)
 
         # Поле: Время готовки
-        self.cook_time_input = QSpinBox()
-        self.cook_time_input.setMinimum(1)
-        self.cook_time_input.setMaximum(999)
-        self.cook_time_input.setSuffix(" мин")
-        form_layout.addRow("Время готовки:", self.cook_time_input)
+        self.spin_cook_time = QSpinBox()
+        self.spin_cook_time.setMinimum(1)
+        self.spin_cook_time.setMaximum(999)
+        self.spin_cook_time.setSuffix(" мин")
+        form_layout.addRow("Время готовки:", self.spin_cook_time)
 
         # Поле: Ингредиенты (многострочное)
-        self.ingredients_input = QTextEdit()
-        self.ingredients_input.setPlaceholderText(
+        self.te_ingredients = QTextEdit()
+        self.te_ingredients.setPlaceholderText(
             "Введите ингредиенты по одному на строку:\n"
             "картошка 500г\n"
             "свекла 200г\n"
             "лук 1шт"
         )
-        self.ingredients_input.setMaximumHeight(120)
-        form_layout.addRow("Ингредиенты:", self.ingredients_input)
+        self.te_ingredients.setMaximumHeight(120)
+        form_layout.addRow("Ингредиенты:", self.te_ingredients)
 
         right_layout.addWidget(form_widget)
 
         # Место для изображения
-        self.image_label = QLabel("Нет фото")
-        self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setMinimumHeight(200)
-        self.image_label.setStyleSheet("""background-color: #f0f0f0; border: 2px dashed #aaaaaa; border-radius: 8px; font-size: 16px; color: #888888; """)
-        right_layout.addWidget(self.image_label)
+        self.lbl_image = QLabel("Обложка/Фото")
+        self.lbl_image.setAlignment(Qt.AlignCenter)
+        self.lbl_image.setMinimumHeight(200)
+        self.lbl_image.setStyleSheet("background-color: #f5f5f5; border: 2px dashed #bbb; border-radius: 8px;")
+        right_layout.addWidget(self.lbl_image)
 
         # Кнопки для фото и списка покупок
         image_buttons_layout = QHBoxLayout()
@@ -155,13 +155,13 @@ class MainWindow(QMainWindow):
                 background-color: #E5F4FF;
                 color: black;
             }
-            QLineEdit, QTextEdit, QSpinBox{
+            QLineEdit, QTextEdit, QSpinBox, QComboBox {
                 padding: 6px;
                 border: 1px solid #8F949C;
                 border-radius: 3px;
             }
             
-            QLineEdit:focus, QTextEdit:focus, QSpinBox:focus
+            QLineEdit:focus, QTextEdit:focus, QSpinBox:focus, QComboBox:focus
             {border: 2px solid #006BBE;}
         """
         self.setStyleSheet(style)
@@ -178,17 +178,17 @@ class MainWindow(QMainWindow):
 
     def _add_recipe(self):
         """Добавляем новый рецепт"""
-        title = self.title_input.text().strip()
+        title = self.le_title.text().strip()
         if not title:
             QMessageBox.warning(self, "Внимание", "Введите название рецепта!")
-            self.title_input.setFocus()
+            self.le_title.setFocus()
             return
 
         # Собираем данные из полей
-        category = self.category_input.text().strip()
-        servings = self.servings_input.value()
-        cook_time = self.cook_time_input.value()
-        ingredients = self.ingredients_input.toPlainText().strip()
+        category = self.cb_category.text().strip()
+        servings = self.spin_servings.value()
+        cook_time = self.spin_cook_time.value()
+        ingredients = self.te_ingredients.toPlainText().strip()
         image_path = self.current_image_path
 
         # Добавляем в базу данных
@@ -207,7 +207,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Внимание", "Сначала выберите рецепт!")
             return
 
-        title = self.title_input.text().strip()
+        title = self.le_title.text().strip()
         if not title:
             QMessageBox.warning(self, "Внимание", "Введите название рецепта!")
             return
@@ -217,10 +217,10 @@ class MainWindow(QMainWindow):
         recipe_id = self.table.item(row, 0).data(Qt.UserRole)
 
         # Собираем данные
-        category = self.category_input.text().strip()
-        servings = self.servings_input.value()
-        cook_time = self.cook_time_input.value()
-        ingredients = self.ingredients_input.toPlainText().strip()
+        category = self.cb_category.text().strip()
+        servings = self.spin_servings.value()
+        cook_time = self.spin_cook_time.value()
+        ingredients = self.te_ingredients.toPlainText().strip()
         image_path = self.current_image_path
 
         # Обновляем в базе
@@ -273,11 +273,11 @@ class MainWindow(QMainWindow):
         recipe = self.db.get_one(recipe_id)
         if recipe:
             # Заполняем поля
-            self.title_input.setText(recipe[1] or "")
-            self.category_input.setText(recipe[2] or "")
-            self.servings_input.setValue(recipe[3] or 1)
-            self.cook_time_input.setValue(recipe[4] or 0)
-            self.ingredients_input.setText(recipe[5] or "")
+            self.le_title.setText(recipe[1] or "")
+            self.cb_category.setText(recipe[2] or "")
+            self.spin_servings.setValue(recipe[3] or 1)
+            self.spin_cook_time.setValue(recipe[4] or 0)
+            self.te_ingredients.setText(recipe[5] or "")
 
             # Загружаем фото, если есть
             image_path = recipe[6] or ""
@@ -286,8 +286,8 @@ class MainWindow(QMainWindow):
                 self._show_image(image_path)
             else:
                 self.current_image_path = ""
-                self.image_label.setText("Нет фото")
-                self.image_label.setStyleSheet("""
+                self.lbl_image.setText("Нет фото")
+                self.lbl_image.setStyleSheet("""
                     background-color: #f0f0f0;
                     border: 2px dashed #aaaaaa;
                     border-radius: 8px;
@@ -337,9 +337,9 @@ class MainWindow(QMainWindow):
         qt_image = QImage(data, image.width, image.height, QImage.Format_RGBA8888)
         pixmap = QPixmap.fromImage(qt_image)
 
-        self.image_label.setPixmap(pixmap)
-        self.image_label.setAlignment(Qt.AlignCenter)
-        self.image_label.setStyleSheet("""
+        self.lbl_image.setPixmap(pixmap)
+        self.lbl_image.setAlignment(Qt.AlignCenter)
+        self.lbl_image.setStyleSheet("""
             background-color: #f0f0f0;
             border: 2px solid #4CAF50;
             border-radius: 8px;
@@ -347,7 +347,7 @@ class MainWindow(QMainWindow):
 
     def _generate_shopping_list(self):
         """Создаём список покупок из ингредиентов"""
-        ingredients_text = self.ingredients_input.toPlainText().strip()
+        ingredients_text = self.te_ingredients.toPlainText().strip()
 
         if not ingredients_text:
             QMessageBox.warning(self, "Внимание", "Нет ингредиентов для списка!")
@@ -367,7 +367,7 @@ class MainWindow(QMainWindow):
             shopping_list += f"{i}. {item}\n"
 
         # Добавляем название рецепта
-        title = self.title_input.text().strip()
+        title = self.le_title.text().strip()
         if title:
             shopping_list += f"\nРецепт: {title}"
 
@@ -375,22 +375,22 @@ class MainWindow(QMainWindow):
 
     def _clear_fields(self):
         """Очищаем все поля формы"""
-        self.title_input.clear()
-        self.category_input.clear()
-        self.servings_input.setValue(1)
-        self.cook_time_input.setValue(0)
-        self.ingredients_input.clear()
+        self.le_title.clear()
+        self.cb_category.clear()
+        self.spin_servings.setValue(1)
+        self.spin_cook_time.setValue(0)
+        self.te_ingredients.clear()
         self.current_image_path = ""
 
-        self.image_label.setText("Нет фото")
-        self.image_label.setStyleSheet("""
+        self.lbl_image.setText("Нет фото")
+        self.lbl_image.setStyleSheet("""
             background-color: #f0f0f0;
             border: 2px dashed #aaaaaa;
             border-radius: 8px;
             font-size: 16px;
             color: #888888;
         """)
-        self.image_label.setPixmap(QPixmap())  # Убираем картинку
+        self.lbl_image.setPixmap(QPixmap())  # Убираем картинку
 
         def closeEvent(self, event):
         """Переопределение закрытия окна """

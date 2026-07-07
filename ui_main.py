@@ -38,7 +38,6 @@ class MainWindow(QMainWindow):
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
-        # Таблица
         self.table = QTableWidget()
         self.table.setColumnCount(4)
         self.table.setHorizontalHeaderLabels(["Название", "Категория", "Порции", "Время (мин)"])
@@ -47,7 +46,6 @@ class MainWindow(QMainWindow):
         self.table.setEditTriggers(QTableWidget.NoEditTriggers)
         left_layout.addWidget(self.table)
 
-        # Кнопки под таблицей
         buttons_layout = QHBoxLayout()
         self.btn_add = QPushButton("Добавить")
         self.btn_edit = QPushButton("Изменить")
@@ -61,34 +59,28 @@ class MainWindow(QMainWindow):
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
-        # Форма с полями ввода
         form_widget = QWidget()
         form_layout = QFormLayout(form_widget)
 
-        # Поле: Название
         self.le_title = QLineEdit()
         self.le_title.setPlaceholderText("Например: Борщ")
         form_layout.addRow("Название:", self.le_title)
 
-        # Поле: Категория
         self.cb_category = QComboBox()
         self.cb_category.addItems(["Завтрак", "Суп", "Основное блюдо", "Салат", "Десерт"])
         form_layout.addRow("Категория:", self.cb_category)  # Эта строка была пропущена!
 
-        # Поле: Порции (число от 1 до 99)
         self.spin_servings = QSpinBox()
         self.spin_servings.setMinimum(1)
         self.spin_servings.setMaximum(99)
         form_layout.addRow("Порции:", self.spin_servings)
 
-        # Поле: Время готовки
         self.spin_cook_time = QSpinBox()
         self.spin_cook_time.setMinimum(1)
         self.spin_cook_time.setMaximum(999)
         self.spin_cook_time.setSuffix(" мин")
         form_layout.addRow("Время готовки:", self.spin_cook_time)
 
-        # Поле: Ингредиенты (многострочное)
         self.te_ingredients = QTextEdit()
         self.te_ingredients.setPlaceholderText(
             "Введите ингредиенты по одному на строку:\n"
@@ -108,7 +100,7 @@ class MainWindow(QMainWindow):
         self.lbl_image.setStyleSheet("background-color: #f5f5f5; border: 2px dashed #bbb; border-radius: 8px;")
         right_layout.addWidget(self.lbl_image)
 
-        # Кнопки для фото и списка покупок
+        # Кнопки управления
         image_buttons_layout = QHBoxLayout()
         self.btn_load_image = QPushButton("Загрузить фото")
         self.btn_shopping_list = QPushButton("Список покупок")
@@ -116,7 +108,7 @@ class MainWindow(QMainWindow):
         image_buttons_layout.addWidget(self.btn_shopping_list)
         right_layout.addLayout(image_buttons_layout)
 
-        # разделитель
+        # Разделитель
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(left_widget)
         splitter.addWidget(right_widget)

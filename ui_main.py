@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFo
                              QPushButton, QLineEdit, QTextEdit, QLabel, QTableWidget,
                              QTableWidgetItem, QHeaderView, QMessageBox, QFileDialog,
                              QSplitter, QSpinBox, QComboBox)
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QImage
 from PIL import Image
@@ -66,22 +67,18 @@ class MainWindow(QMainWindow):
 
         self.le_title = QLineEdit()
         self.le_title.setPlaceholderText("Например: Борщ")
-        form_layout.addRow("Название:", self.le_title)
 
         self.cb_category = QComboBox()
         self.cb_category.addItems(["Завтрак", "Суп", "Основное блюдо", "Салат", "Десерт"])
-        form_layout.addRow("Категория:", self.cb_category)
 
         self.spin_servings = QSpinBox()
         self.spin_servings.setMinimum(1)
         self.spin_servings.setMaximum(99)
-        form_layout.addRow("Порции:", self.spin_servings)
 
         self.spin_cook_time = QSpinBox()
         self.spin_cook_time.setMinimum(1)
         self.spin_cook_time.setMaximum(999)
         self.spin_cook_time.setSuffix(" мин")
-        form_layout.addRow("Время готовки:", self.spin_cook_time)
 
         self.te_ingredients = QTextEdit()
         self.te_ingredients.setPlaceholderText(
@@ -91,8 +88,12 @@ class MainWindow(QMainWindow):
             "лук 1шт"
         )
         self.te_ingredients.setMaximumHeight(120)
+        # Добавляем поля в форму
+        form_layout.addRow("Название:", self.le_title)
+        form_layout.addRow("Категория:", self.cb_category)
+        form_layout.addRow("Порции:", self.spin_servings)
+        form_layout.addRow("Время готовки:", self.spin_cook_time)
         form_layout.addRow("Ингредиенты:", self.te_ingredients)
-
         right_layout.addWidget(form_widget)
 
         # Место для изображения
@@ -117,7 +118,6 @@ class MainWindow(QMainWindow):
         splitter.setSizes([550, 450])
         main_layout.addWidget(splitter)
 
-        # Применение стиля
         self._apply_style()
 
     def _apply_style(self):
@@ -175,6 +175,7 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, "Ошибка!", "Введите название рецепта!")
             self.le_title.setFocus()
             return
+
         try:
             self.db.add(
                 title,
@@ -188,7 +189,7 @@ class MainWindow(QMainWindow):
             self._clear_fields()
             QMessageBox.information(self, "Успех", "Рецепт добавлен!")
         except Exception as e:
-            QMessageBox.critical(self, "Внимание", f"Не получилось добавить рецепт:\n{e}")
+            QMessageBox.critical(self, "Внимание", f"Не удалось добавить рецепт:\n{e}")
 
     def _edit_recipe(self):
         """Редактируем выбранный рецепт"""
@@ -206,31 +207,29 @@ class MainWindow(QMainWindow):
         recipe_id = self.table.item(row, 0).data(Qt.UserRole)
 
         try:
-            self.db.update(
-                recipe_id,
-                title,
-                self.cb_category.currentText(),
-                self.spin_servings.value(),
-                self.spin_cook_time.value(),
-                self.te_ingredients.toPlainText().strip(),
-                self.current_image_path
-            )
+            self.db.update(recipe_id, title,
+                           self.cb_category.currentText(),
+                           self.spin_servings.value(),
+                           self.spin_cook_time.value(),
+                           self.te_ingredients.toPlainText().strip(),
+                           self.current_image_path
+                           )
             self._refresh_table()
             self._clear_fields()
             QMessageBox.information(self, "Успех", "Рецепт обновлён!")
         except Exception as e:
-            QMessageBox.critical(self, "Внимание", f"Не получилось обновить рецепт:\n{e}")
+            QMessageBox.critical(self, "Внимание", f"Не удалось обновить рецепт:\n{e}")
 
     def _delete_recipe(self):
         """Удаляем выбранный рецепт"""
         selected_rows = self.table.selectionModel().selectedRows()
         if not selected_rows:
-            QMessageBox.warning(self, "Внимание!", "Сначала выберите рецепт!")
+            QMessageBox.warning(self, "Внимание", "Выберите рецепт для удаления!")
             return
-          
+
         reply = QMessageBox.question(self,
-                                 "Подтверждение", "Вы уверены, что хотите удалить этот рецепт?",
-                                 QMessageBox.Yes | QMessageBox.No)
+                                     "Подтверждение", "Вы уверены, что хотите удалить этот рецепт?",
+                                     QMessageBox.Yes | QMessageBox.No)
 
         if reply == QMessageBox.Yes:
             row = selected_rows[0].row()
@@ -242,7 +241,7 @@ class MainWindow(QMainWindow):
                 self._clear_fields()
                 QMessageBox.information(self, "Успех", "Рецепт удалён!")
             except Exception as e:
-                QMessageBox.critical(self, "Внимание", f"Не получилось удалить рецепт:\n{e}")
+                QMessageBox.critical(self, "Внимание", f"Не удалось удалить рецепт:\n{e}")
 
     def _on_select_recipe(self):
         """Заполнение формы при клике на строку таблицы"""
@@ -254,6 +253,7 @@ class MainWindow(QMainWindow):
         recipe_id = self.table.item(row, 0).data(Qt.UserRole)
 
         recipe = self.db.get_one(recipe_id)
+
         if recipe:
             self.le_title.setText(recipe[1] or "")
             category = recipe[2] or ""
@@ -262,6 +262,7 @@ class MainWindow(QMainWindow):
                 self.cb_category.setCurrentIndex(index)
             else:
                 self.cb_category.setCurrentIndex(0)
+
             self.spin_servings.setValue(recipe[3] or 1)
             self.spin_cook_time.setValue(recipe[4] or 0)
             self.te_ingredients.setText(recipe[5] or "")
@@ -273,20 +274,18 @@ class MainWindow(QMainWindow):
             else:
                 self.current_image_path = ""
                 self.lbl_image.setText("Нет фото")
-                self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #999; border-radius: 8px;")
+                self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #999; border-radius: 6px;")
 
     def _refresh_table(self):
         """Обновление данных таблицы из БД"""
         self.table.setRowCount(0)
         recipes = self.db.get_all()
-
         for i, recipe in enumerate(recipes):
             self.table.insertRow(i)
             self.table.setItem(i, 0, QTableWidgetItem(recipe[1] or ""))
             self.table.setItem(i, 1, QTableWidgetItem(recipe[2] or ""))
             self.table.setItem(i, 2, QTableWidgetItem(str(recipe[3] or "")))
             self.table.setItem(i, 3, QTableWidgetItem(str(recipe[4] or "")))
-
             self.table.item(i, 0).setData(Qt.UserRole, recipe[0])
 
     def _load_image(self):
@@ -304,7 +303,7 @@ class MainWindow(QMainWindow):
     def _show_image(self, path):
         """Показываем фото в QLabel (уменьшаем до 300x200)"""
         image = Image.open(path).convert("RGBA")
-        image.thumbnail((300, 200), Image.Resampling.LANCZOS)
+        image.thumbnail((300, 200), Image.LANCZOS)
 
         data = image.tobytes("raw", "RGBA")
         qt_image = QImage(data, image.width, image.height, QImage.Format_RGBA8888)
@@ -312,7 +311,7 @@ class MainWindow(QMainWindow):
 
         self.lbl_image.setPixmap(pixmap)
         self.lbl_image.setAlignment(Qt.AlignCenter)
-        self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #006BBE; border-radius: 6px; ")
+        self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #006BBE; border-radius: 4px; ")
 
     def _generate_shopping_list(self):
         """Создаём список покупок из ингредиентов"""
@@ -325,9 +324,8 @@ class MainWindow(QMainWindow):
         if not items:
             QMessageBox.warning(self, "Внимание", "Нет ингредиентов для списка!")
             return
-          
-        shopping_list = "Список покупок\n" + "=" * 30 + "\n\n"
 
+        shopping_list = "Список покупок\n" + "=" * 30 + "\n\n"
         for i, item in enumerate(items, 1):
             shopping_list += f"{i}. {item}\n"
 
@@ -345,13 +343,12 @@ class MainWindow(QMainWindow):
         self.spin_cook_time.setValue(1)
         self.te_ingredients.clear()
         self.current_image_path = ""
-
         self.lbl_image.setText("Фото")
-        self.lbl_image.setStyleSheet(("background-color: #f5f5f5; border: 2px dashed #bbb; border-radius: 8px;"))
+        self.lbl_image.setStyleSheet("background-color: #f5f5f5; border: 2px dashed #bbb; border-radius: 8px;")
         self.lbl_image.setPixmap(QPixmap())
 
     def closeEvent(self, event):
-        """Переопределение закрытия окна"""
+        """Переопределение закрытия окна """
         reply = QMessageBox.question(self, "Выход", "Сохранить изменения перед выходом?",
                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 

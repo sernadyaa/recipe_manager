@@ -2,10 +2,10 @@ import os
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                              QPushButton, QLineEdit, QTextEdit, QLabel, QTableWidget,
                              QTableWidgetItem, QHeaderView, QMessageBox, QFileDialog,
-                             QSplitter, QSpinBox, QComboBox)
+                             QSplitter, QSpinBox, QComboBox, QShortcut)
 
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QImage
+from PyQt5.QtGui import QPixmap, QImage, QKeySequence
 from PIL import Image
 from database import Database
 
@@ -167,7 +167,12 @@ class MainWindow(QMainWindow):
         self.btn_load_image.clicked.connect(self._load_image)
         self.btn_shopping_list.clicked.connect(self._generate_shopping_list)
         self.table.itemSelectionChanged.connect(self._on_select_recipe)
-
+        # Горячие клавиши
+        QShortcut(QKeySequence("Ctrl+N"), self).activated.connect(self._add_recipe)# Ctrl+N (добавить)
+        QShortcut(QKeySequence("Ctrl+E"), self).activated.connect(self._edit_recipe)# Ctrl+E (изменить)
+        QShortcut(QKeySequence("Del"), self).activated.connect(self._delete_recipe)# Del (удалить)
+        QShortcut(QKeySequence("Ctrl+L"), self).activated.connect(self._load_image)# Ctrl+L (загрузить фото)
+        QShortcut(QKeySequence("Ctrl+S"), self).activated.connect(self._generate_shopping_list)# Ctrl+S (список покупок)
     def _add_recipe(self):
         """Добавляем новый рецепт"""
         title = self.le_title.text().strip()

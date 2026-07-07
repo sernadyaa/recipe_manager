@@ -14,21 +14,17 @@ class MainWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
-
-        # Настраиваем окно
         self.setWindowTitle("Менеджер рецептов (PyQt5 Practice)")
         self.resize(1200, 750)
         self.setMinimumSize(1000, 600)
-
-        # Подключаемся к базе данных
+        # Центральная часть окна
         self.db = Database()
-        # Здесь будем хранить путь к загруженному фото
         self.current_image_path = ""
-        # Создаём интерфейс
+        # 1. Верстка интерфейса
         self._setup_ui()
-        # Привязываем кнопки к функциям
+        # 2. Привязка событий
         self._bind_signals()
-        # Загружаем рецепты в таблицу
+        # 3. Загрузка начальных данных
         self._refresh_table()
 
     def _setup_ui(self):

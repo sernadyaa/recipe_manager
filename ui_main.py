@@ -1,4 +1,5 @@
 import os
+import logging
 from PyQt5.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QFormLayout,
                              QPushButton, QLineEdit, QTextEdit, QLabel, QTableWidget,
                              QTableWidgetItem, QHeaderView, QMessageBox, QFileDialog,
@@ -9,25 +10,28 @@ from PyQt5.QtGui import QPixmap, QImage, QKeySequence
 from PIL import Image
 from database import Database
 
+logger = logging.getLogger(__name__)
+
 
 class MainWindow(QMainWindow):
     """Главное окно приложения Менеджер рецептов"""
 
     def __init__(self):
-        """Конструктор - вызывается при создании окна"""
         super().__init__()
+        logger.info("Инициализация главного окна")
+
         self.setWindowTitle("Менеджер рецептов (PyQt5 Practice)")
         self.resize(1200, 750)
         self.setMinimumSize(1000, 600)
-        # Центральная часть окна
+
         self.db = Database()
         self.current_image_path = ""
-        # 1. Верстка интерфейса
+
         self._setup_ui()
-        # 2. Привязка событий
         self._bind_signals()
-        # 3. Загрузка начальных данных
         self._refresh_table()
+
+        logger.info("Главное окно готово")
 
     def _setup_ui(self):
         """Создаём весь интерфейс окна"""
@@ -37,7 +41,7 @@ class MainWindow(QMainWindow):
         main_layout = QHBoxLayout()
         central_widget.setLayout(main_layout)
 
-        # Левая панель: Таблица с рецептами и кнопки
+        # Левая панель
         left_widget = QWidget()
         left_layout = QVBoxLayout(left_widget)
 
@@ -58,7 +62,7 @@ class MainWindow(QMainWindow):
         buttons_layout.addWidget(self.btn_delete)
         left_layout.addLayout(buttons_layout)
 
-        # Правая панель: Форма для ввода данных
+        # Правая панель
         right_widget = QWidget()
         right_layout = QVBoxLayout(right_widget)
 
@@ -88,7 +92,7 @@ class MainWindow(QMainWindow):
             "лук 1шт"
         )
         self.te_ingredients.setMaximumHeight(120)
-        # Добавляем поля в форму
+
         form_layout.addRow("Название:", self.le_title)
         form_layout.addRow("Категория:", self.cb_category)
         form_layout.addRow("Порции:", self.spin_servings)
@@ -96,14 +100,12 @@ class MainWindow(QMainWindow):
         form_layout.addRow("Ингредиенты:", self.te_ingredients)
         right_layout.addWidget(form_widget)
 
-        # Место для изображения
         self.lbl_image = QLabel("Обложка/Фото")
         self.lbl_image.setAlignment(Qt.AlignCenter)
         self.lbl_image.setMinimumHeight(200)
         self.lbl_image.setStyleSheet("background-color: #f5f5f5; border: 2px dashed #bbb; border-radius: 8px;")
         right_layout.addWidget(self.lbl_image)
 
-        # Кнопки управления
         image_buttons_layout = QHBoxLayout()
         self.btn_load_image = QPushButton("Загрузить фото")
         self.btn_shopping_list = QPushButton("Список покупок")
@@ -111,7 +113,6 @@ class MainWindow(QMainWindow):
         image_buttons_layout.addWidget(self.btn_shopping_list)
         right_layout.addLayout(image_buttons_layout)
 
-        # Разделитель
         splitter = QSplitter(Qt.Horizontal)
         splitter.addWidget(left_widget)
         splitter.addWidget(right_widget)
@@ -152,7 +153,6 @@ class MainWindow(QMainWindow):
                 border: 1px solid #8F949C;
                 border-radius: 3px;
             }
-            
             QLineEdit:focus, QTextEdit:focus, QSpinBox:focus, QComboBox:focus
             {border: 2px solid #006BBE;}
         """
@@ -167,12 +167,14 @@ class MainWindow(QMainWindow):
         self.btn_load_image.clicked.connect(self._load_image)
         self.btn_shopping_list.clicked.connect(self._generate_shopping_list)
         self.table.itemSelectionChanged.connect(self._on_select_recipe)
+
         # Горячие клавиши
-        QShortcut(QKeySequence("Ctrl+N"), self).activated.connect(self._add_recipe)# Ctrl+N (добавить)
-        QShortcut(QKeySequence("Ctrl+E"), self).activated.connect(self._edit_recipe)# Ctrl+E (изменить)
-        QShortcut(QKeySequence("Del"), self).activated.connect(self._delete_recipe)# Del (удалить)
-        QShortcut(QKeySequence("Ctrl+L"), self).activated.connect(self._load_image)# Ctrl+L (загрузить фото)
-        QShortcut(QKeySequence("Ctrl+S"), self).activated.connect(self._generate_shopping_list)# Ctrl+S (список покупок)
+        QShortcut(QKeySequence("Ctrl+N"), self).activated.connect(self._add_recipe)
+        QShortcut(QKeySequence("Ctrl+E"), self).activated.connect(self._edit_recipe)
+        QShortcut(QKeySequence("Del"), self).activated.connect(self._delete_recipe)
+        QShortcut(QKeySequence("Ctrl+L"), self).activated.connect(self._load_image)
+        QShortcut(QKeySequence("Ctrl+S"), self).activated.connect(self._generate_shopping_list)
+
     def _add_recipe(self):
         """Добавляем новый рецепт"""
         title = self.le_title.text().strip()
@@ -192,9 +194,11 @@ class MainWindow(QMainWindow):
             )
             self._refresh_table()
             self._clear_fields()
+            logger.info(f"Рецепт добавлен: {title}")
             QMessageBox.information(self, "Успех", "Рецепт добавлен!")
         except Exception as e:
-            QMessageBox.critical(self, "Внимание", f"Не удалось добавить рецепт:\n{e}")
+            logger.error(f"Ошибка добавления рецепта: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось добавить рецепт:\n{e}")
 
     def _edit_recipe(self):
         """Редактируем выбранный рецепт"""
@@ -221,9 +225,11 @@ class MainWindow(QMainWindow):
                            )
             self._refresh_table()
             self._clear_fields()
+            logger.info(f"Рецепт обновлён: {title} (ID: {recipe_id})")
             QMessageBox.information(self, "Успех", "Рецепт обновлён!")
         except Exception as e:
-            QMessageBox.critical(self, "Внимание", f"Не удалось обновить рецепт:\n{e}")
+            logger.error(f"Ошибка обновления рецепта ID {recipe_id}: {e}")
+            QMessageBox.critical(self, "Ошибка", f"Не удалось обновить рецепт:\n{e}")
 
     def _delete_recipe(self):
         """Удаляем выбранный рецепт"""
@@ -244,9 +250,11 @@ class MainWindow(QMainWindow):
                 self.db.delete(recipe_id)
                 self._refresh_table()
                 self._clear_fields()
+                logger.info(f"Рецепт удалён: ID {recipe_id}")
                 QMessageBox.information(self, "Успех", "Рецепт удалён!")
             except Exception as e:
-                QMessageBox.critical(self, "Внимание", f"Не удалось удалить рецепт:\n{e}")
+                logger.error(f"Ошибка удаления рецепта ID {recipe_id}: {e}")
+                QMessageBox.critical(self, "Ошибка", f"Не удалось удалить рецепт:\n{e}")
 
     def _on_select_recipe(self):
         """Заполнение формы при клике на строку таблицы"""
@@ -256,7 +264,6 @@ class MainWindow(QMainWindow):
 
         row = selected_rows[0].row()
         recipe_id = self.table.item(row, 0).data(Qt.UserRole)
-
         recipe = self.db.get_one(recipe_id)
 
         if recipe:
@@ -280,6 +287,10 @@ class MainWindow(QMainWindow):
                 self.current_image_path = ""
                 self.lbl_image.setText("Нет фото")
                 self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #999; border-radius: 6px;")
+        else:
+            logger.warning(f"Рецепт не найден: ID {recipe_id}")
+            QMessageBox.warning(self, "Внимание", "Рецепт не найден!")
+            self._clear_fields()
 
     def _refresh_table(self):
         """Обновление данных таблицы из БД"""
@@ -295,28 +306,35 @@ class MainWindow(QMainWindow):
 
     def _load_image(self):
         """Загрузка и масштабирование изображения через Pillow"""
-        file_path, _ = QFileDialog.getOpenFileName(self, "Выберите фото для рецепта", "",
+        file_path, _ = QFileDialog.getOpenFileName(self,
+                                                   "Выберите фото для рецепта", "",
                                                    "Изображения (*.png *.jpg *.jpeg *.bmp *.gif)")
 
         if file_path:
             try:
                 self.current_image_path = file_path
                 self._show_image(file_path)
+                logger.info(f"Загружено фото: {os.path.basename(file_path)}")
             except Exception as e:
-                QMessageBox.critical(self, "Внимание", f"Не удалось загрузить фото:\n{e}")
+                logger.error(f"Ошибка загрузки фото: {e}")
+                QMessageBox.critical(self, "Ошибка", f"Не удалось загрузить фото:\n{e}")
 
     def _show_image(self, path):
         """Показываем фото в QLabel (уменьшаем до 300x200)"""
-        image = Image.open(path).convert("RGBA")
-        image.thumbnail((300, 200), Image.LANCZOS)
+        try:
+            image = Image.open(path).convert("RGBA")
+            image.thumbnail((300, 200), Image.Resampling.LANCZOS)
 
-        data = image.tobytes("raw", "RGBA")
-        qt_image = QImage(data, image.width, image.height, QImage.Format_RGBA8888)
-        pixmap = QPixmap.fromImage(qt_image)
+            data = image.tobytes("raw", "RGBA")
+            qt_image = QImage(data, image.width, image.height, QImage.Format_RGBA8888)
+            pixmap = QPixmap.fromImage(qt_image)
 
-        self.lbl_image.setPixmap(pixmap)
-        self.lbl_image.setAlignment(Qt.AlignCenter)
-        self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #006BBE; border-radius: 4px; ")
+            self.lbl_image.setPixmap(pixmap)
+            self.lbl_image.setAlignment(Qt.AlignCenter)
+            self.lbl_image.setStyleSheet("background-color: #fff; border: 2px solid #006BBE; border-radius: 4px; ")
+        except Exception as e:
+            logger.error(f"Ошибка отображения фото {path}: {e}")
+            raise
 
     def _generate_shopping_list(self):
         """Создаём список покупок из ингредиентов"""
@@ -345,7 +363,7 @@ class MainWindow(QMainWindow):
         self.le_title.clear()
         self.cb_category.setCurrentIndex(0)
         self.spin_servings.setValue(1)
-        self.spin_cook_time.setValue(1)
+        self.spin_cook_time.setValue(0)
         self.te_ingredients.clear()
         self.current_image_path = ""
         self.lbl_image.setText("Фото")
@@ -353,7 +371,7 @@ class MainWindow(QMainWindow):
         self.lbl_image.setPixmap(QPixmap())
 
     def closeEvent(self, event):
-        """Переопределение закрытия окна """
+        """Переопределение закрытия окна"""
         reply = QMessageBox.question(self, "Выход", "Сохранить изменения перед выходом?",
                                      QMessageBox.Yes | QMessageBox.No | QMessageBox.Cancel)
 
@@ -361,4 +379,5 @@ class MainWindow(QMainWindow):
             event.ignore()
         else:
             self.db.close()
+            logger.info("Приложение закрыто")
             event.accept()

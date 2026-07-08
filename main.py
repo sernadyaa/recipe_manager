@@ -1,20 +1,35 @@
 import sys
+import logging
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtGui import QFont
 from ui_main import MainWindow
 
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('app.log'),
+        logging.StreamHandler()
+    ]
+)
+logger = logging.getLogger(__name__)
+
 def main():
-    # 1. Создаем экземпляр приложения. sys.argv обязателен для передачи аргументов Qt
-    app = QApplication(sys.argv)
-    # 2. Шрифт по умолчанию для лучшей читаемости на всех ОС
-    app.setFont(QFont('Segoe UI', 10))
-    # 3. Метаданные приложения (отображаются в заголовке окна и отладчике)
-    app.setApplicationName('Менеджер рецептов')
-    # 4. Создаем и показываем главное окно
-    window = MainWindow()
-    window.show()
-    # 5. Запускаем цикл обработки событий. sys.exit() гарантирует корректное завершение
-    sys.exit(app.exec_())
+    logger.info("Запуск приложения 'Менеджер рецептов'")
+    try:
+        app = QApplication(sys.argv)
+        app.setFont(QFont('Segoe UI', 10))
+        app.setApplicationName('Менеджер рецептов')
+
+        window = MainWindow()
+        window.show()
+
+        logger.info("Приложение успешно запущено")
+        sys.exit(app.exec_())
+
+    except Exception as e:
+        logger.error(f"Критическая ошибка: {e}")
+        raise
 
 if __name__ == "__main__":
     main()

@@ -11,9 +11,10 @@ class Database:
         self.connection = sqlite3.connect(db_name)
         self.cursor = self.connection.cursor()
         self._create_table()
-        logger.info(f"Подключение к БД: {db_name}")
+        logger.info("Подключение к БД: recipes.db")
 
     def _create_table(self):
+        """Создаёт таблицу recipes, если она не существует"""
         try:
             self.cursor.execute("""
                 CREATE TABLE IF NOT EXISTS recipes (
@@ -33,6 +34,7 @@ class Database:
             raise
 
     def get_all(self):
+        """Получает все рецепты из базы данных"""
         try:
             self.cursor.execute("SELECT * FROM recipes ORDER BY title")
             recipes = self.cursor.fetchall()
@@ -42,7 +44,17 @@ class Database:
             logger.error(f"Ошибка загрузки рецептов: {e}")
             return []
 
+    def get_one(self, recipe_id):
+        """Получает рецепт по идентификатору"""
+        try:
+            self.cursor.execute("SELECT * FROM recipes WHERE id = ?", (recipe_id,))
+            return self.cursor.fetchone()
+        except Exception as e:
+            logger.error(f"Ошибка получения рецепта ID {recipe_id}: {e}")
+            return None
+
     def add(self, title, category, servings, cook_time, ingredients, image_path):
+        """Добавляет новый рецепт в базу данных"""
         try:
             self.cursor.execute("""
                 INSERT INTO recipes (title, category, servings, cook_time, ingredients, image_path)
@@ -55,6 +67,7 @@ class Database:
             raise
 
     def update(self, recipe_id, title, category, servings, cook_time, ingredients, image_path):
+        """Обновляет существующий рецепт"""
         try:
             self.cursor.execute("""
                 UPDATE recipes 
@@ -68,6 +81,7 @@ class Database:
             raise
 
     def delete(self, recipe_id):
+        """Удаляет рецепт по идентификатору"""
         try:
             self.cursor.execute("DELETE FROM recipes WHERE id = ?", (recipe_id,))
             self.connection.commit()
@@ -77,6 +91,7 @@ class Database:
             raise
 
     def close(self):
+        """Закрывает соединение с базой данных"""
         try:
             self.connection.close()
             logger.info("Соединение с БД закрыто")

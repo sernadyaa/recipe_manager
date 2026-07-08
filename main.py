@@ -14,8 +14,11 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+
 def main():
+    """Точка входа в приложение"""
     logger.info("Запуск приложения 'Менеджер рецептов'")
+
     try:
         app = QApplication(sys.argv)
         app.setFont(QFont('Segoe UI', 10))
@@ -30,6 +33,7 @@ def main():
     except Exception as e:
         logger.error(f"Критическая ошибка: {e}")
         raise
+
 
 if __name__ == "__main__":
     main()
